@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Подбор башенных кранов | Crane Selector</title>
+  <meta name="description" content="Интерактивный подбор башенных кранов по грузоподъёмности, вылету стрелы и высоте подъёма. Каталог моделей SANY, Potain, Liebherr, Zoomlion, КБ и других.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --bg-card: #1a2332;
+      --bg-elevated: #243044;
+      --border: #2d3a4f;
+      --text: #e8eef7;
+      --text-muted: #8b9cb3;
+      --accent: #f5a623;
+      --accent-hover: #ffb84d;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --info: #3b82f6;
+      --radius: 12px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #1a2332 0%, #0f1419 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent), #e67e22);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      background: var(--bg-elevated);
+      color: var(--accent);
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+    }
+
+    /* Hero */
+    .hero {
+      background: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245, 166, 35, 0.15), transparent),
+        linear-gradient(180deg, #1a2332 0%, var(--bg) 100%);
+      padding: 3.5rem 1.5rem 2.5rem;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.8rem, 5vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, #fff 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 560px;
+      margin: 0 auto 1.5rem;
+    }
+
+    /* Main layout */
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    /* Filter panel */
+    .filters {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      position: sticky;
+      top: 90px;
+      box-shadow: var(--shadow);
+    }
+
+    .filters h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.15rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.2);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #e67e22);
+      color: #111;
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(245, 166, 35, 0.35);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-elevated);
+      color: var(--text);
+    }
+
+    /* Results */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .results-header h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .count {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-elevated);
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: var(--accent);
+    }
+
+    .sort-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .crane-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .crane-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.35rem;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .crane-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+    }
+
+    .crane-card.match-high {
+      border-color: rgba(34, 197, 94, 0.5);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .crane-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+      line-height: 1.3;
+    }
+
+    .crane-brand {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .type-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      white-space: nowrap;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .type-badge.flat { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-color: rgba(59,130,246,0.3); }
+    .type-badge.hammer { background: rgba(245, 166, 35, 0.15); color: var(--accent); border-color: rgba(245,166,35,0.3); }
+    .type-badge.luffing { background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168,85,247,0.3); }
+    .type-badge.self { background: rgba(34, 197, 94, 0.15); color: #4ade80; border-color: rgba(34,197,94,0.3); }
+
+    .specs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+
+    .spec {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 0.55rem 0.7rem;
+    }
+
+    .spec-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .spec-value {
+      font-weight: 700;
+      font-size: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 0.15rem;
+    }
+
+    .spec-value small {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .match-bar {
+      height: 4px;
+      background: var(--bg);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 0.25rem;
+    }
+
+    .match-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    .match-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 1rem;
+      opacity: 0.4;
+    }
+
+    /* Info section */
+    .info-section {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .info-card h3 {
+      font-size: 1rem;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* Utility */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">🏗</div>
+        <span>CraneSelect</span>
+      </div>
+      <span class="badge">Бесплатный подбор</span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Подбор башенных кранов</h1>
+    <p>Укажите требования к грузоподъёмности, вылету стрелы и высоте — система подберёт подходящие модели из каталога популярных кранов.</p>
+  </section>
+
+  <main>
+    <aside class="filters">
+      <h2>⚙️ Параметры подбора</h2>
+
+      <div class="form-group">
+        <label for="maxLoad">Макс. грузоподъёмность, т ≥</label>
+        <input type="number" id="maxLoad" min="0" step="0.5" placeholder="например 8">
+      </div>
+
+      <div class="form-group">
+        <label for="tipLoad">Грузоподъёмность на конце, т ≥</label>
+        <input type="number" id="tipLoad" min="0" step="0.1" placeholder="например 1.5">
+      </div>
+
+      <div class="form-group">
+        <label for="jibLength">Макс. вылет стрелы, м ≥</label>
+        <input type="number" id="jibLength" min="0" step="1" placeholder="например 60">
+      </div>
+
+      <div class="form-group">
+        <label for="height">Свободностоящая высота, м ≥</label>
+        <input type="number" id="height" min="0" step="1" placeholder="например 50">
+      </div>
+
+      <div class="form-group">
+        <label for="type">Тип крана</label>
+        <select id="type">
+          <option value="">Любой</option>
+          <option value="flat">Безоголовочный (flat-top)</option>
+          <option value="hammer">С оголовком (hammerhead)</option>
+          <option value="luffing">Люффинговый</option>
+          <option value="self">Самомонтирующийся</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="brand">Производитель</label>
+        <select id="brand">
+          <option value="">Любой</option>
+          <option value="SANY">SANY</option>
+          <option value="Potain">Potain (Manitowoc)</option>
+          <option value="Liebherr">Liebherr</option>
+          <option value="Zoomlion">Zoomlion</option>
+          <option value="Terex">Terex</option>
+          <option value="КБ">КБ (российские)</option>
+          <option value="Wolff">Wolffkran</option>
+          <option value="Comansa">Comansa</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary" onclick="applyFilters()">🔍 Подобрать</button>
+      <button class="btn btn-ghost" onclick="resetFilters()">Сбросить</button>
+    </aside>
+
+    <section>
+      <div class="results-header">
+        <h2>Результаты <span class="count" id="resultCount">0</span></h2>
+        <select class="sort-select" id="sortBy" onchange="applyFilters()">
+          <option value="match">По соответствию</option>
+          <option value="maxLoad">По грузоподъёмности ↓</option>
+          <option value="jib">По вылету ↓</option>
+          <option value="height">По высоте ↓</option>
+          <option value="name">По названию</option>
+        </select>
+      </div>
+
+      <div class="crane-grid" id="craneGrid">
+        <!-- cards rendered by JS -->
+      </div>
+    </section>
+  </main>
+
+  <section class="info-section">
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>📐 Грузовой момент</h3>
+        <p>Основной параметр — произведение веса груза на вылет. Кран выбирают так, чтобы он уверенно поднимал самый тяжёлый элемент на самом дальнем радиусе с запасом на строповку.</p>
+      </div>
+      <div class="info-card">
+        <h3>📏 Высота и крепление</h3>
+        <p>Свободностоящая высота ограничена. Для высотных объектов кран крепят к зданию (tied-in) или используют самоподъём. Учитывайте количество креплений и сечение башни.</p>
+      </div>
+      <div class="info-card">
+        <h3>🏗 Типы кранов</h3>
+        <p><strong>Flat-top</strong> — удобны при работе нескольких кранов. <strong>Hammerhead</strong> — классика с высокой грузоподъёмностью на вылете. <strong>Luffing</strong> — для стеснённых площадок. <strong>Самомонтирующиеся</strong> — быстрый монтаж на небольших объектах.</p>
+      </div>
+      <div class="info-card">
+        <h3>⚠️ Важно</h3>
+        <p>Данные носят справочный характер. Перед выбором обязательно сверяйте актуальные load-charts производителя и учитывайте ветер, фундамент, наличие монтажного крана и логистику секций.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>CraneSelect · Каталог моделей для ориентировочного подбора · 
+      <a href="https://github.com/def-lt/tower-crane-selector" target="_blank" rel="noopener">GitHub</a>
+    </p>
+    <p style="margin-top:0.5rem;font-size:0.8rem;">Данные собраны из открытых источников. Не являются коммерческим предложением.</p>
+  </footer>
+
+  <script>
+    // === Каталог кранов (примерные характеристики из открытых источников) ===
+    const CRANES = [
+      {
+        id: 1,
+        name: "SFT258 (T7021-12)",
+        brand: "SANY",
+        type: "flat",
+        typeLabel: "Безоголовочный",
+        maxLoad: 12,
+        tipLoad: 2.1,
+        jib: 70,
+        height: 60,
+        note: "Популярная модель для жилого и коммерческого строительства"
+      },
+      {
+        id: 2,
+        name: "SFT315 (T7530-16)",
+        brand: "SANY",
+        type: "flat",
+        typeLabel: "Безоголовочный",
+        maxLoad: 16,
+        tipLoad: 2.6,
+        jib: 75,
+        height: 60,
+        note: "Усиленная грузоподъёмность"
+      },
+      {
+        id: 3,
+        name: "SYT125 (T6515-8)",
+        brand: "SANY",
+        type: "flat",
+        typeLabel: "Безоголовочный",
+        maxLoad: 8,
+        tipLoad: 1.5,
+        jib: 65,
+        height: 46,
+        note: "Средний класс"
+      },
+      {
+        id: 4,
+        name: "SYT80 (T5710-6)",
+        brand: "SANY",
+        type: "flat",
+        typeLabel: "Безоголовочный",
+        maxLoad: 5,
+        tipLoad: 1.3,
+        jib: 50,
+        height: 40.5,
+        note: "Компактный вариант"
+      },
+      {
+        id: 5,
+        name: "MDT 259 J12",
+        brand: "Potain",
+        type: "flat",
+        typeLabel: "Безоголовочный",
+        maxLoad: 12,
+        tipLoad: 2.9,
+        jib: 65,
+        height: 71,
+        note: "Высокая свободностоящая высота"
+      },
+      {
+        id: 6,
+        name: "MDT 389 L16",
+        brand: "Potain",
+        type: "flat",
+        typeLabel: "Безоголовочный",
+        maxLoad: 16,
+        tipLoad: 3.3,
+        jib: 75,
+        height: 96,
+        note: "Для высотного строительства"
+      },
+      {
+        id: 7,
+        name: "MR 309 H16",
+        brand: "Potain",
+        type: "luffing",
+        typeLabel: "Люффинговый",
+        maxLoad: 16,
+        tipLoad: 3.4,
+        jib: 60,
+        height: 75,
+        note: "Для стеснённых площадок"
+      },
+      {
+        id: 8,
+        name: "MR 618",
+        brand: "Potain",
+        type: "luffing",
+        typeLabel: "Люффинговый",
+        maxLoad: 32,
+        tipLoad: 8.25,
+        jib: 60,
+        height: 75,
+        note: "Высокая грузоподъёмность"
+      },
+      {
+        id: 9,
+        name: "WA7527",
+        brand: "Zoomlion",
+        type: "flat",
+        typeLabel: "Безоголовочный",
+        maxLoad: 16,
+        tipLoad: 2.7,
+        jib: 75,
+        height: 60,
+        note: "Китайский flat-top"
+      },
+      {
+        id: 10,
+        name: "WA7015",
+        brand: "Zoomlion",
+        type: "flat",
+        typeLabel: "Безоголовочный",
+        maxLoad: 10,
+        tipLoad: 1.5,
+        jib: 70,
+        height: 60,
+        note: "Оптимальный баланс"
+      },
+      {
+        id: 11,
+        name: "КБ-403",
+        brand: "КБ",
+        type: "hammer",
+        typeLabel: "С оголовком",
+        maxLoad: 8,
+        tipLoad: 3,
+        jib: 30,
+        height: 38,
+        note: "Классика российского рынка"
+      },
+      {
+        id: 12,
+        name: "КБ-408",
+        brand: "КБ",
+        type: "hammer",
+        typeLabel: "С оголовком",
+        maxLoad: 10,
+        tipLoad: 6,
+        jib: 30,
+        height: 47,
+        note: "Повышенная грузоподъёмность на конце"
+      },
+      {
+        id: 13,
+        name: "КБ-674",
+        brand: "КБ",
+        type: "hammer",
+        typeLabel: "С оголовком",
+        maxLoad: 12.5,
+        tipLoad: 5.6,
+        jib: 50.5,
+        height: 60,
+        note: "Для объектов средней высоты"
+      },
+      {
+        id: 14,
+        name: "WOLFF 7021 Clear",
+        brand: "Wolff",
+        type: "flat",
+        typeLabel: "Безоголовочный",
+        maxLoad: 12,
+        tipLoad: 2.1,
+        jib: 70,
+        height: 52,
+        note: "Немецкий flat-top, удобный монтаж"
+      },
+      {
+        id: 15,
+        name: "440 HC-L 18/36",
+        brand: "Liebherr",
+        type: "luffing",
+        typeLabel: "Люффинговый",
+        maxLoad: 36,
+        tipLoad: 5,
+        jib: 65,
+        height: 55,
+        note: "Мощный люффинг от Liebherr"
+      },
+      {
+        id: 16,
+        name: "Igo T 130",
+        brand: "Potain",
+        type: "self",
+        typeLabel: "Самомонтирующийся",
+        maxLoad: 8,
+        tipLoad: 1.4,
+        jib: 50,
+        height: 37,
+        note: "Быстрый монтаж без вспомогательного крана"
+      },
+      {
+        id: 17,
+        name: "Igo 50",
+        brand: "Potain",
+        type: "self",
+        typeLabel: "Самомонтирующийся",
+        maxLoad: 4,
+        tipLoad: 1.1,
+        jib: 40,
+        height: 23,
+        note: "Для малоэтажного строительства"
+      },
+      {
+        id: 18,
+        name: "CTT 561-32",
+        brand: "Terex",
+        type: "flat",
+        typeLabel: "Безоголовочный",
+        maxLoad: 32,
+        tipLoad: 1.5,
+        jib: 84,
+        height: 60,
+        note: "Большой вылет"
+      },
+      {
+        id: 19,
+        name: "11LC150",
+        brand: "Comansa",
+        type: "flat",
+        typeLabel: "Безоголовочный",
+        maxLoad: 8,
+        tipLoad: 1.7,
+        jib: 60,
+        height: 57,
+        note: "Испанский flat-top"
+      },
+      {
+        id: 20,
+        name: "SYT250 (T7527-12)",
+        brand: "SANY",
+        type: "flat",
+        typeLabel: "Безоголовочный",
+        maxLoad: 12,
+        tipLoad: 2.7,
+        jib: 75,
+        height: 51,
+        note: "Хороший tip-load на большом вылете"
+      }
+    ];
+
+    function getFilters() {
+      return {
+        maxLoad: parseFloat(document.getElementById('maxLoad').value) || 0,
+        tipLoad: parseFloat(document.getElementById('tipLoad').value) || 0,
+        jibLength: parseFloat(document.getElementById('jibLength').value) || 0,
+        height: parseFloat(document.getElementById('height').value) || 0,
+        type: document.getElementById('type').value,
+        brand: document.getElementById('brand').value,
+        sortBy: document.getElementById('sortBy').value
+      };
+    }
+
+    function calcMatch(crane, f) {
+      // Простая оценка соответствия (0-100)
+      let score = 100;
+      let penalties = 0;
+
+      if (f.maxLoad > 0) {
+        if (crane.maxLoad < f.maxLoad) return 0;
+        // Чем ближе к запросу, тем лучше (не перебор)
+        const over = crane.maxLoad / f.maxLoad;
+        if (over > 2.5) score -= 15;
+      }
+      if (f.tipLoad > 0) {
+        if (crane.tipLoad < f.tipLoad) return 0;
+      }
+      if (f.jibLength > 0) {
+        if (crane.jib < f.jibLength) return 0;
+      }
+      if (f.height > 0) {
+        if (crane.height < f.height) return 0;
+      }
+      if (f.type && crane.type !== f.type) return 0;
+      if (f.brand && crane.brand !== f.brand) return 0;
+
+      // Бонусы за близость параметров
+      if (f.maxLoad > 0) {
+        const ratio = Math.min(crane.maxLoad / f.maxLoad, 2);
+        score -= Math.abs(1 - ratio) * 20;
+      }
+      return Math.max(10, Math.round(score));
+    }
+
+    function applyFilters() {
+      const f = getFilters();
+      let results = CRANES.map(c => ({
+        ...c,
+        match: calcMatch(c, f)
+      })).filter(c => c.match > 0);
+
+      // Сортировка
+      switch (f.sortBy) {
+        case 'maxLoad':
+          results.sort((a, b) => b.maxLoad - a.maxLoad);
+          break;
+        case 'jib':
+          results.sort((a, b) => b.jib - a.jib);
+          break;
+        case 'height':
+          results.sort((a, b) => b.height - a.height);
+          break;
+        case 'name':
+          results.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+          break;
+        default:
+          results.sort((a, b) => b.match - a.match || b.maxLoad - a.maxLoad);
+      }
+
+      renderResults(results);
+    }
+
+    function resetFilters() {
+      document.getElementById('maxLoad').value = '';
+      document.getElementById('tipLoad').value = '';
+      document.getElementById('jibLength').value = '';
+      document.getElementById('height').value = '';
+      document.getElementById('type').value = '';
+      document.getElementById('brand').value = '';
+      document.getElementById('sortBy').value = 'match';
+      applyFilters();
+    }
+
+    function typeClass(type) {
+      const map = { flat: 'flat', hammer: 'hammer', luffing: 'luffing', self: 'self' };
+      return map[type] || '';
+    }
+
+    function renderResults(list) {
+      const grid = document.getElementById('craneGrid');
+      document.getElementById('resultCount').textContent = list.length;
+
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div style="font-size:3rem;opacity:0.3">🏗</div>
+            <p>Нет кранов, соответствующих заданным параметрам.<br>Попробуйте смягчить требования.</p>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = list.map(c => `
+        <article class="crane-card ${c.match >= 80 ? 'match-high' : ''}">
+          <div class="card-top">
+            <div>
+              <div class="crane-name">${c.name}</div>
+              <div class="crane-brand">${c.brand}</div>
+            </div>
+            <span class="type-badge ${typeClass(c.type)}">${c.typeLabel}</span>
+          </div>
+
+          <div class="specs">
+            <div class="spec">
+              <div class="spec-label">Макс. г/п</div>
+              <div class="spec-value">${c.maxLoad} <small>т</small></div>
+            </div>
+            <div class="spec">
+              <div class="spec-label">На конце</div>
+              <div class="spec-value">${c.tipLoad} <small>т</small></div>
+            </div>
+            <div class="spec">
+              <div class="spec-label">Вылет</div>
+              <div class="spec-value">${c.jib} <small>м</small></div>
+            </div>
+            <div class="spec">
+              <div class="spec-label">Высота св.</div>
+              <div class="spec-value">${c.height} <small>м</small></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="match-label">
+              <span>Соответствие</span>
+              <span>${c.match}%</span>
+            </div>
+            <div class="match-bar">
+              <div class="match-fill" style="width:${c.match}%"></div>
+            </div>
+          </div>
+
+          ${c.note ? `<p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem">${c.note}</p>` : ''}
+        </article>
+      `).join('');
+    }
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', () => {
+      applyFilters();
+
+      // Авто-поиск при вводе (с небольшой задержкой)
+      let timer;
+      ['maxLoad', 'tipLoad', 'jibLength', 'height', 'type', 'brand'].forEach(id => {
+        document.getElementById(id).addEventListener('input', () => {
+          clearTimeout(timer);
+          timer = setTimeout(applyFilters, 300);
+        });
+        document.getElementById(id).addEventListener('change', applyFilters);
+      });
+    });
+  </script>
+</body>
+</html>
